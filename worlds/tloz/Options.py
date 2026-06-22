@@ -33,8 +33,17 @@ class StartingPosition(Choice):
     option_dangerous = 2
     option_very_dangerous = 3
 
+class DungeonShuffle(Choice):
+    """Shuffles which overworld dungeon entrance leads to which dungeon interior.
+    Vanilla: dungeon entrances are in their original positions.
+    Simple: all 9 dungeon entrances are shuffled."""
+    display_name = "Dungeon Shuffle"
+    option_vanilla = 0
+    option_simple = 1
+
 @dataclass
 class TlozOptions(PerGameCommonOptions):
     ExpandedPool: ExpandedPool
     TriforceLocations: TriforceLocations
     StartingPosition: StartingPosition
+    DungeonShuffle: DungeonShuffle

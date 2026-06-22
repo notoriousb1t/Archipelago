@@ -9,11 +9,13 @@ import typing
 
 from typing import NamedTuple, Union, Dict, Any
 from BaseClasses import Item, Location, Region, Entrance, MultiWorld, ItemClassification, Tutorial
+from .Entrances import dungeon_entrances
 from .ItemPool import generate_itempool, starting_weapons, dangerous_weapon_locations
 from .Items import item_table, item_prices, item_game_ids
 from .Locations import location_table, level_locations, major_locations, shop_locations, all_level_locations, \
     standard_level_locations, shop_price_location_ids, secret_money_ids, location_ids, food_locations, \
     take_any_locations, sword_cave_locations
+from .EntranceShuffle import shuffle_dungeons, write_dungeon_entrances
 from .Options import TlozOptions
 from .Rom import TLoZDeltaPatch, get_base_rom_path, first_quest_dungeon_items_early, first_quest_dungeon_items_late
 from .Rules import set_rules
@@ -116,6 +118,12 @@ class TLoZWorld(World):
         self.rom_name_available_event = threading.Event()
         self.levels = None
         self.filler_items = None
+        self.dungeon_entrance_map: typing.Dict[int, int] = {}  # entrance_slot -> dungeon_number
+
+    def generate_early(self) -> None:
+        if self.options.DungeonShuffle:
+            # Enable topology display in the spoiler log when dungeon shuffle is active.
+            self.topology_present = True
 
     @classmethod
     def stage_assert_generate(cls, multiworld: MultiWorld):
@@ -140,7 +148,8 @@ class TLoZWorld(World):
         for i in range(1, 10):
             level = Region(f"Level {i}", self.player, self.multiworld)
             self.levels.append(level)
-            new_entrance = Entrance(self.player, f"Level {i}", overworld)
+            entrance_name = dungeon_entrances[i - 1].ow_name
+            new_entrance = Entrance(self.player, entrance_name, overworld)
             new_entrance.connect(level)
             overworld.exits.append(new_entrance)
             self.multiworld.regions.append(level)
@@ -178,6 +187,11 @@ class TLoZWorld(World):
         begin_game.connect(overworld)
         self.multiworld.regions.append(menu)
         self.multiworld.regions.append(overworld)
+
+        if self.options.DungeonShuffle:
+            # Shuffle dungeon entrances after all regions and entrances are built.
+            # This reconnects the overworld Entrance objects to shuffled dungeon Regions.
+            shuffle_dungeons(self)
 
 
     def create_items(self):
@@ -277,6 +291,11 @@ class TLoZWorld(World):
             secret_cave_money_amounts[i] = int(amount)
         for i, cave in enumerate(secret_caves):
             rom_data[secret_money_ids[cave]] = secret_cave_money_amounts[i]
+
+        if self.options.DungeonShuffle:
+            # Write dungeon entrance shuffle to the ROM if active.
+            write_dungeon_entrances(self, rom_data)
+
         return rom_data
 
     def generate_output(self, output_directory: str):
@@ -348,6 +367,13 @@ class TLoZWorld(World):
                 "TakeAnyMiddle": -1,
                 "TakeAnyRight": -1
             }
+
+        # Include the dungeon entrance mapping so clients can display which
+        # physical entrance leads to which dungeon. Keys are entrance slot
+        # numbers (1-9), values are the dungeon number now behind that entrance.
+        # Empty dict when dungeon shuffle is vanilla (no shuffle).
+        slot_data["DungeonEntranceMap"] = self.dungeon_entrance_map
+
         return slot_data
 
 
