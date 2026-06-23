@@ -68,7 +68,8 @@ def set_rules(tloz_world: "TLoZWorld"):
                      lambda state: state.has("Stepladder", player))
 
     # Level 4 Access
-    for location in tloz_world.levels[4].locations:
+    lvl4_dungeon = tloz_world.dungeon_entrance_map[4]
+    for location in tloz_world.levels[lvl4_dungeon].locations:
         add_rule(tloz_world.get_location(location.name),
                  lambda state: state.has_any(("Raft", "Recorder"), player))
 
@@ -84,7 +85,8 @@ def set_rules(tloz_world: "TLoZWorld"):
                      lambda state: state.has("Bow", player) and state.has_group("arrows", player))
 
     # Recorder Access for Level 7
-    for location in tloz_world.levels[7].locations:
+    lvl7_dungeon = tloz_world.dungeon_entrance_map[7]
+    for location in tloz_world.levels[lvl7_dungeon].locations:
         add_rule(tloz_world.get_location(location.name),
                  lambda state: state.has("Recorder", player))
 
@@ -98,7 +100,8 @@ def set_rules(tloz_world: "TLoZWorld"):
                  lambda state: state.has_group("swords", player) or state.has("Magical Rod", player))
 
     # Candle access for Level 8
-    for location in tloz_world.levels[8].locations:
+    lvl8_dungeon = tloz_world.dungeon_entrance_map[8]
+    for location in tloz_world.levels[lvl8_dungeon].locations:
         add_rule(tloz_world.get_location(location.name),
             lambda state: state.has_group("candles", player))
 

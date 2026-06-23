@@ -118,7 +118,7 @@ class TLoZWorld(World):
         self.rom_name_available_event = threading.Event()
         self.levels = None
         self.filler_items = None
-        self.dungeon_entrance_map: typing.Dict[int, int] = {}  # entrance_slot -> dungeon_number
+        self.dungeon_entrance_map: typing.Dict[int, int] = {i: i for i in range(1, 10)}  # entrance_slot -> dungeon_number
 
     def generate_early(self) -> None:
         if self.options.DungeonShuffle:
