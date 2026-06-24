@@ -14,7 +14,7 @@ from .Items import item_table, item_prices, item_game_ids
 from .Locations import location_table, level_locations, major_locations, shop_locations, all_level_locations, \
     standard_level_locations, shop_price_location_ids, secret_money_ids, location_ids, food_locations, \
     take_any_locations, sword_cave_locations
-from .Options import TlozOptions
+from .Options import TlozOptions, Heartbeat
 from .Rom import TLoZDeltaPatch, get_base_rom_path, first_quest_dungeon_items_early, first_quest_dungeon_items_late
 from .Rules import set_rules
 from worlds.AutoWorld import World, WebWorld
@@ -223,10 +223,27 @@ class TLoZWorld(World):
             if item & 0b00011111 == 0b00000011:
                 rom_data[first_quest_dungeon_items_late + i] = item | 0b00111111
         return rom_data
+    
+    def apply_client_options(self, rom_data):
+        """Apply options which do not affect randomization options, but require a write to rom data"""
+
+        heartbeat_note_address = 0x1872 # The first note in the heartbeat tune
+        match self.options.Heartbeat:
+            case Heartbeat.option_off:
+                rom_data[heartbeat_note_address] = 0x90
+            case Heartbeat.option_quiet:
+                rom_data[heartbeat_note_address] = 0x93
+            case Heartbeat.option_other:
+                # Experimenting with different notes, this is less abrasive than the vanilla heart beat
+                # and sounds quieter despite being the same volume.
+                rom_data[heartbeat_note_address] = 0xD5
+            case _:
+                pass
 
     def apply_randomizer(self):
         with open(get_base_rom_path(), 'rb') as rom:
             rom_data = self.apply_base_patch(rom)
+        self.apply_client_options(rom_data)
         # Write each location's new data in
         for location in self.multiworld.get_filled_locations(self.player):
             # Zelda and Ganon aren't real locations

@@ -33,8 +33,21 @@ class StartingPosition(Choice):
     option_dangerous = 2
     option_very_dangerous = 3
 
+class Heartbeat(Choice):
+    """Updates the heartbeat options.
+    option_vanilla: Standard heartbeat
+    option_none: Disables heartbeat
+    option_quiet: Reduces the volume of the heartbeat
+    option_other: An alternative heartbeat that is less abrasive"""
+    display_name = "Heartbeat"
+    option_on = 0
+    option_off = 1
+    option_quiet = 2
+    option_other = 3
+
 @dataclass
 class TlozOptions(PerGameCommonOptions):
     ExpandedPool: ExpandedPool
     TriforceLocations: TriforceLocations
     StartingPosition: StartingPosition
+    Heartbeat: Heartbeat
