@@ -229,9 +229,11 @@ class TLoZWorld(World):
 
         dialog_speed_address = 0x4864 # This appears to be shifted by the base patch.
         match self.options.DialogSpeed:
-            case DialogSpeed.option_faster:
+            case DialogSpeed.option_fast:
+                # Rewrites the literal frame value from 6 to 2.
                 rom_data[dialog_speed_address] = 0x02
-            case DialogSpeed.option_fastest:
+            case DialogSpeed.option_faster:
+                # Rewrites the literal  literal frame value from 6 to 1.
                 rom_data[dialog_speed_address] = 0x01
             case _:
                 pass
