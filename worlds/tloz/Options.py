@@ -33,8 +33,20 @@ class StartingPosition(Choice):
     option_dangerous = 2
     option_very_dangerous = 3
 
+class DialogSpeed(Choice):
+    """The speed dialog advances.
+    option_vanilla: 6 frames per letter
+    option_faster: 2 frames per letter
+    option_fastest: 1 frame per letter
+    """
+    display_name = "Dialog Speed"
+    option_vanilla = 0
+    option_faster = 1
+    option_fastest = 2
+
 @dataclass
 class TlozOptions(PerGameCommonOptions):
     ExpandedPool: ExpandedPool
     TriforceLocations: TriforceLocations
     StartingPosition: StartingPosition
+    DialogSpeed: DialogSpeed
